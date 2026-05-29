@@ -1,13 +1,13 @@
-use std::{collections::HashMap, process::exit};
 use dialoguer::{Input, theme::ColorfulTheme};
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
+use std::{collections::HashMap, process::exit};
 
-use super::saving::{save_subject, Save};
+use super::saving::{Save, save_subject};
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Subject {
     pub name: String,
-    pub value: f32
+    pub value: f32,
 }
 
 // Prompt users to add a subject
@@ -23,16 +23,16 @@ pub fn prompt_subject(save: bool) -> Subject {
         .unwrap();
 
     let subject_weight_float = match subject_weight_input.parse::<f32>() {
-            Ok(v) => v,
-            Err(_) => {
-                println!("ERROR: The weight that you input must be a number, decimals allowed.");
-                exit(1);
-            }
-        };
+        Ok(v) => v,
+        Err(_) => {
+            println!("ERROR: The weight that you input must be a number, decimals allowed.");
+            exit(1);
+        }
+    };
 
     let subject = Subject {
         name: subject_name_input,
-        value: subject_weight_float
+        value: subject_weight_float,
     };
 
     if save {
@@ -64,7 +64,7 @@ pub fn prompt_grades(subjects: Vec<Subject>) -> HashMap<String, f32> {
                 exit(1);
             }
         };
-        
+
         grades.insert(subject.name, grade_as_float);
     }
 
@@ -75,7 +75,7 @@ pub fn prompt_grades(subjects: Vec<Subject>) -> HashMap<String, f32> {
 // returns subjects with a corresponding grade as a hashmap (to make it easier to print)
 pub struct SubjectWithGrade {
     pub subject: Subject,
-    pub grade: f32
+    pub grade: f32,
 }
 
 pub fn subjects_with_grades(save: Save) -> Vec<SubjectWithGrade> {
@@ -86,17 +86,20 @@ pub fn subjects_with_grades(save: Save) -> Vec<SubjectWithGrade> {
     // go through each subject, find its grade and add it to the subject_and_grades vector
     for subject in subjects {
         let grade_for_subject = grades.get(&subject.name).unwrap_or_else(|| {
-                println!("ERROR: Grade missing for subject {}, please run the enter grades function.", subject.name);
-                exit(1);
+            println!(
+                "ERROR: Grade missing for subject {}, please run the enter grades function.",
+                subject.name
+            );
+            exit(1);
         });
 
         let subject_with_grade = SubjectWithGrade {
             subject,
-            grade: grade_for_subject.clone()
+            grade: *grade_for_subject,
         };
 
         subject_and_grades.push(subject_with_grade);
-    };
+    }
 
     subject_and_grades
 }
@@ -104,14 +107,41 @@ pub fn subjects_with_grades(save: Save) -> Vec<SubjectWithGrade> {
 // Quebec Secondary III default (2026)
 pub fn default_subjects() -> Vec<Subject> {
     vec![
-        Subject { name: "Math".to_string(), value: 6.0 },
-        Subject { name: "English".to_string(), value: 6.0 },
-        Subject { name: "French".to_string(), value: 6.0 },
-        Subject { name: "Science".to_string(), value: 6.0 },
-        Subject { name: "History".to_string(), value: 4.0 },
-        Subject { name: "POP".to_string(), value: 4.0 },
-        Subject { name: "Music".to_string(), value: 2.0 },
-        Subject { name: "Gym".to_string(), value: 2.0 },
-        Subject { name: "Study".to_string(), value: 2.0 },
+        Subject {
+            name: "Math".to_string(),
+            value: 6.0,
+        },
+        Subject {
+            name: "English".to_string(),
+            value: 6.0,
+        },
+        Subject {
+            name: "French".to_string(),
+            value: 6.0,
+        },
+        Subject {
+            name: "Science".to_string(),
+            value: 6.0,
+        },
+        Subject {
+            name: "History".to_string(),
+            value: 4.0,
+        },
+        Subject {
+            name: "POP".to_string(),
+            value: 4.0,
+        },
+        Subject {
+            name: "Music".to_string(),
+            value: 2.0,
+        },
+        Subject {
+            name: "Gym".to_string(),
+            value: 2.0,
+        },
+        Subject {
+            name: "Study".to_string(),
+            value: 2.0,
+        },
     ]
 }

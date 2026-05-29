@@ -12,7 +12,7 @@ pub fn calculate_report_mean(subjects_with_grades: Vec<SubjectWithGrade>) -> f32
     for subject in subjects_with_grades {
         total_grade_value += subject.grade * subject.subject.value;
         total_credits += subject.subject.value;
-    };
+    }
 
     // return the mean of all subjects
     total_grade_value / total_credits

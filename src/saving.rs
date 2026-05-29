@@ -1,11 +1,11 @@
 // handle everything related to saving persistent data, subjects, grades, and goals
 
+use dirs::config_dir;
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::io::Write;
 use std::process::exit;
 use std::{fs, path::PathBuf};
-use serde::{Deserialize, Serialize};
-use dirs::{config_dir};
 
 use super::goals::Goal;
 use super::subject::Subject;
@@ -14,7 +14,7 @@ use super::subject::Subject;
 pub struct Save {
     pub subjects: HashMap<String, Subject>,
     pub goals: HashMap<String, Goal>,
-    pub grades: HashMap<String, f32>
+    pub grades: HashMap<String, f32>,
 }
 
 fn get_save_dir() -> PathBuf {
@@ -33,6 +33,7 @@ pub fn get_data() -> Save {
         .read(true)
         .write(true)
         .create(true)
+        .truncate(true)
         .open(&save_dir)
         .expect("Failed to open data file, the CLI may not have permissions.");
 
@@ -45,12 +46,14 @@ pub fn get_data() -> Save {
         let mut file = fs::OpenOptions::new()
             .write(true)
             .create(true)
+            .truncate(true)
             .open(&save_dir)
             .expect("ERROR: Failed to create ");
 
         let base_file = "{ \"subjects\": {}, \"goals\": {}, \"grades\": {} }".as_bytes();
 
-        file.write_all(base_file).expect("ERROR: Failed to initialize the data file, the CLI may not have permissions.");
+        file.write_all(base_file)
+            .expect("ERROR: Failed to initialize the data file, the CLI may not have permissions.");
     };
 
     let save: Save = serde_json::from_reader(save_file).expect("ERROR: Failed to load your saved information. The save file may not be structured as expected.");
@@ -65,7 +68,8 @@ pub fn write_data(data: Save) {
     let mut save_dir = get_save_dir();
     save_dir.push("data.json");
 
-    fs::write(save_dir, json).expect("ERROR: Failed to save data, the CLI may not have necessary permissions."); 
+    fs::write(save_dir, json)
+        .expect("ERROR: Failed to save data, the CLI may not have necessary permissions.");
 }
 
 pub fn save_subject(subject: Subject) {
@@ -73,12 +77,12 @@ pub fn save_subject(subject: Subject) {
     let mut data = get_data();
 
     // add new data to it (ensure it doesn't already exist)
-    if data.subjects.get(&subject.name).is_some() {
+    if data.subjects.contains_key(&subject.name) {
         println!("ERROR: You are trying to add a subject that already exists!");
         exit(1);
     }
 
-    data.subjects.insert(subject.name.clone(),subject);
+    data.subjects.insert(subject.name.clone(), subject);
 
     // save and finish
     write_data(data);
@@ -100,7 +104,7 @@ pub fn save_goal(goal: Goal) {
     let mut data = get_data();
 
     // add new data to it (ensure it doesn't already exist)
-    if data.goals.get(&goal.name).is_some() {
+    if data.goals.contains_key(&goal.name) {
         println!("ERROR: You are trying to add a subject that already exists!");
         exit(1);
     }

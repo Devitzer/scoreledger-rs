@@ -1,5 +1,5 @@
-use std::process::exit;
 use dialoguer::{Select, theme::ColorfulTheme};
+use std::process::exit;
 
 use scoreledger::{calculate_mean, goals, saving, subject};
 
@@ -8,16 +8,14 @@ fn main() {
         "Add a subject",
         "Enter grades",
         "Set a goal",
-        "Delete a goal",
         "View report card",
-        "DEBUG",
-        "Exit"
+        "Exit",
     ];
 
     let selection_menu = Select::with_theme(&ColorfulTheme::default())
         .with_prompt("Scoreledger - Select an option")
         .items(&selections[..])
-        .default(6)
+        .default(4)
         .interact()
         .unwrap();
 
@@ -29,7 +27,10 @@ fn main() {
     if choice == "Add a subject" {
         let subject = subject::prompt_subject(true);
 
-        println!("Your new subject \"{}\" was added successfully.", &subject.name);
+        println!(
+            "Your new subject \"{}\" was added successfully.",
+            &subject.name
+        );
     } else if choice == "Enter grades" {
         // get data
         let data = saving::get_data();
@@ -51,15 +52,17 @@ fn main() {
 
         // go through each subject and grade and display it to the user
         for subject_and_grade in &subjects_with_grades {
-            println!("{}: {}", subject_and_grade.subject.name, subject_and_grade.grade);
+            println!(
+                "{}: {}",
+                subject_and_grade.subject.name, subject_and_grade.grade
+            );
         }
 
         // display mean of report card to user
         let mean = calculate_mean::calculate_report_mean(subjects_with_grades);
         println!("Report Card Mean: {}", mean);
-        
+
         // TODO: determine if goals are met
-        
     } else if choice == "Exit" {
         println!("Exiting...");
         exit(0);

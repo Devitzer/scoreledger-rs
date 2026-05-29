@@ -1,6 +1,12 @@
 # Scoreledger (EARLY DEVELOPMENT)
 
-Scoreledger is a CLI tool that allows you to create a report card by adding subjects. You can also add goals and view your "report card" to see whether you've met your goals based on your grades.
+Scoreledger is a CLI tool that allows you to create a report card by adding subjects. You can also add goals and view your "report card" to see whether you've met your goals based on your grades. <br>
+It's a good tool to have early info on specific details regarding your grades to see if you meet requirements for certain awards, is an example of a use case. You can also keep track of personal goals that you want to exceed.
+
+## Usage
+
+It's simple to get started. Simply install the CLI using this command: `cargo install scoreledger` <br>
+Then, you can run the tool by simply typing `scoreledger`, which will bring up a menu with options. We suggest you start by adding your classes.
 
 ## Adding classes
 
@@ -21,3 +27,21 @@ To add a goal, you select the "Set a goal" option in the select menu, it will pr
 - The goal name (a short title)
 - The goal threshold (what amount your report card mean must be above for the goal to be met)
 
+## View report card
+
+To view your report card, you select the "View report card" option in the select menu, it shows you:
+- Your grade value for each class
+- The mean of your report card (using the weights of the class)
+- Whether your goals were met (**TO BE ADDED**)
+
+## Exit
+
+To exit, you select the "Exit" option in the select menu, this one is self-explanatory.
+
+## Delete a goal
+
+**TO BE ADDED**
+
+## Delete a subject
+
+**TO BE ADDED**
