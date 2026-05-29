@@ -6,7 +6,7 @@ description = "A CLI tool that helps you analyze data from your report card."
 license = "MIT"
 readme = "README.md"
 repository = "https://github.com/Devitzer/scoreledger-rs"
-keywords = ["cli", "tool", "utility", "school", "academic", "grade", "subject", "goal"]
+keywords = ["cli", "tool", "school", "grade", "subject"]
 categories = ["command-line-utilities"]
 
 [dependencies]
