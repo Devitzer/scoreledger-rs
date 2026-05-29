@@ -1,0 +1,112 @@
+// handle everything related to saving persistent data, subjects, grades, and goals
+
+use std::collections::HashMap;
+use std::io::Write;
+use std::process::exit;
+use std::{fs, path::PathBuf};
+use serde::{Deserialize, Serialize};
+use dirs::{config_dir};
+
+use super::goals::Goal;
+use super::subject::Subject;
+
+#[derive(Deserialize, Serialize)]
+pub struct Save {
+    pub subjects: HashMap<String, Subject>,
+    pub goals: HashMap<String, Goal>,
+    pub grades: HashMap<String, f32>
+}
+
+fn get_save_dir() -> PathBuf {
+    // TODO: put custom error here in the future
+    let mut base_dir = config_dir().unwrap();
+
+    base_dir.push("scoreledger_cli");
+    fs::create_dir_all(&base_dir).unwrap();
+    base_dir
+}
+
+pub fn get_data() -> Save {
+    let mut save_dir = get_save_dir();
+    save_dir.push("data.json");
+    let save_file = fs::OpenOptions::new()
+        .read(true)
+        .write(true)
+        .create(true)
+        .open(&save_dir)
+        .expect("Failed to open data file, the CLI may not have permissions.");
+
+    let is_empty = match fs::metadata(&save_dir) {
+        Ok(meta) => meta.len() == 0,
+        Err(_) => true, // file doesn't exist
+    };
+
+    if is_empty {
+        let mut file = fs::OpenOptions::new()
+            .write(true)
+            .create(true)
+            .open(&save_dir)
+            .expect("ERROR: Failed to create ");
+
+        let base_file = "{ \"subjects\": {}, \"goals\": {}, \"grades\": {} }".as_bytes();
+
+        file.write_all(base_file).expect("ERROR: Failed to initialize the data file, the CLI may not have permissions.");
+    };
+
+    let save: Save = serde_json::from_reader(save_file).expect("ERROR: Failed to load your saved information. The save file may not be structured as expected.");
+
+    save
+}
+
+// this assumes the data exists, because there isn't a situation where you can run this without data existing
+// TODO: make this not assume data exists
+pub fn write_data(data: Save) {
+    let json = serde_json::to_string_pretty(&data).unwrap();
+    let mut save_dir = get_save_dir();
+    save_dir.push("data.json");
+
+    fs::write(save_dir, json).expect("ERROR: Failed to save data, the CLI may not have necessary permissions."); 
+}
+
+pub fn save_subject(subject: Subject) {
+    // get existing data
+    let mut data = get_data();
+
+    // add new data to it (ensure it doesn't already exist)
+    if data.subjects.get(&subject.name).is_some() {
+        println!("ERROR: You are trying to add a subject that already exists!");
+        exit(1);
+    }
+
+    data.subjects.insert(subject.name.clone(),subject);
+
+    // save and finish
+    write_data(data);
+}
+
+pub fn save_grades(grades: HashMap<String, f32>) {
+    // get existing data
+    let mut data = get_data();
+
+    // overwrite data
+    data.grades = grades;
+
+    // save and finish
+    write_data(data);
+}
+
+pub fn save_goal(goal: Goal) {
+    // get existing data
+    let mut data = get_data();
+
+    // add new data to it (ensure it doesn't already exist)
+    if data.goals.get(&goal.name).is_some() {
+        println!("ERROR: You are trying to add a subject that already exists!");
+        exit(1);
+    }
+
+    data.goals.insert(goal.name.clone(), goal);
+
+    // save and finish
+    write_data(data);
+}
