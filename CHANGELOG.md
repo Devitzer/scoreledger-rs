@@ -1,3 +1,20 @@
+# v0.3.0 (05/30/2026)
+
+Goals are now fully implemented. The next goal is to make the code more Rust idiomatic and make Scoreledger's function more library friendly (even though they are not really intended to be used).
+
+## Added
+- Goals are now checked in the "View report card" option.
+- You can now remove individual subjects.
+- You can now remove individual goals.
+
+## Changed
+- The function that maps subjects to a grade now uses a reference to the Save instead of taking ownership. (Adjustment for goal implementation)
+- "Enter grades" now adds any existing grades as a default number you can enter for a subject. Whenever you enter grades, you no longer have to re-enter for certain classes, you now only have to confirm.
+- Clarify that the "Delete data" option deletes all data by renaming it "Delete all data".
+
+## Bug Fixes
+- Removed an unintended debug line "You selected: (option)".
+
 # v0.2.0 (05/30/2026)
 
 ## Added

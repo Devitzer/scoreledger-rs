@@ -9,7 +9,9 @@ fn main() {
         "Enter grades",
         "Set a goal",
         "View report card",
-        "Delete data",
+        "Delete a subject",
+        "Delete a goal",
+        "Delete all data",
         "Exit",
     ];
 
@@ -21,8 +23,6 @@ fn main() {
         .unwrap();
 
     let choice = selections[selection_menu];
-
-    println!("You selected: {}", choice);
 
     // determine command to be done
     if choice == "Add a subject" {
@@ -52,7 +52,26 @@ fn main() {
 
         println!("Your new goal \"{}\" was added successfully.", &goal.name);
     } else if choice == "Delete a goal" {
-        todo!();
+        let data = saving::get_data();
+        let goals: Vec<goals::Goal> = data.goals.into_values().collect();
+
+        let goal_selection = goals::prompt_select_goal(&goals).expect("ERROR: The goal you selected no longer exists. This is an unexpected error and may mean your data is partially corrupted.");
+        let prompt = format!(
+            "Are you sure you want to delete the goal \"{}\"?",
+            &goal_selection.name
+        );
+
+        let confirmation = Confirm::with_theme(&ColorfulTheme::default())
+            .with_prompt(prompt)
+            .default(true)
+            .interact()
+            .unwrap();
+
+        if confirmation {
+            saving::delete_goal(goal_selection.name);
+        } else {
+            println!("Your data has not been deleted.");
+        }
     } else if choice == "View report card" {
         let data = saving::get_data();
 
@@ -62,7 +81,7 @@ fn main() {
             exit(1);
         });
 
-        let subjects_with_grades = subject::subjects_with_grades(data);
+        let subjects_with_grades = subject::subjects_with_grades(&data);
 
         // go through each subject and grade and display it to the user
         for subject_and_grade in &subjects_with_grades {
@@ -76,14 +95,30 @@ fn main() {
         let mean = calculate_mean::calculate_report_mean(subjects_with_grades);
         println!("Report Card Mean: {:.2}", mean);
 
-        // TODO: determine if goals are met
+        // determine if goals are met
+        let goal_vec: Vec<goals::Goal> = data.goals.into_values().collect();
+        for goal in goal_vec {
+            if mean >= goal.threshold {
+                println!(
+                    "Goal \"{}\" ({:.2} Threshold): ✓",
+                    &goal.name, &goal.threshold
+                );
+            } else {
+                println!(
+                    "Goal \"{}\" ({:.2} Threshold): ✗",
+                    &goal.name, &goal.threshold
+                );
+            }
+        }
     } else if choice == "Exit" {
         println!("Exiting...");
         exit(0);
-    } else if choice == "Delete data" {
+    } else if choice == "Delete all data" {
         // confirm user wants to delete data
         let confirmation = Confirm::with_theme(&ColorfulTheme::default())
-            .with_prompt("Do you really want to continue?")
+            .with_prompt(
+                "Do you really want to continue? This will delete all subjects, grades, and goals.",
+            )
             .default(true)
             .interact()
             .unwrap();
@@ -93,6 +128,27 @@ fn main() {
         } else {
             println!("Your data has not been deleted.");
         };
+    } else if choice == "Delete a subject" {
+        let data = saving::get_data();
+        let subjects: Vec<subject::Subject> = data.subjects.into_values().collect();
+
+        let subject_selection = subject::prompt_select_subject(&subjects).expect("ERROR: The subject you selected no longer exists. This is an unexpected error and may mean your data is partially corrupted.");
+        let prompt = format!(
+            "Are you sure you want to delete the subject \"{}\"?",
+            &subject_selection.name
+        );
+
+        let confirmation = Confirm::with_theme(&ColorfulTheme::default())
+            .with_prompt(prompt)
+            .default(true)
+            .interact()
+            .unwrap();
+
+        if confirmation {
+            saving::delete_subject(subject_selection.name);
+        } else {
+            println!("Your data has not been deleted.");
+        }
     } else if choice == "DEBUG" {
         println!("nothing to see");
     }

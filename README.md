@@ -46,10 +46,29 @@ To exit, you select the "Exit" option in the select menu, this one is self-expla
 
 **TO BE ADDED**
 
+# Versioning
+
+Scoreledger uses the semantic versioning standard ([SemVer](https://semver.org/)). In summary, the version number is structured like this: MAJOR.MINOR.PATCH.
+- Major updates are updates that introduce breaking changes. With updates like these, you will have information on how to adjust for these breaking changes.
+- Minor updates may introduce new features and bug fixes, that are backwards compatible with other versions. In the context of Scoreledger, it would mean a new update doesn't render your data file invalid.
+- Patch updates introduce bug fixes primarily. These updates are to fix unintended behaviour.
+**Note that Scoreledger is currently in v0, meaning breaking updates can be introduced in minor updates, according to SemVer.**
+
+# Contributing
+If you'd like to do anything for Scoreledger, mainly to patch bugs you notice or complete tasks marked TODO in comments or README.md, you can do the following steps:
+- Fork the repository and clone it to your machine
+- Make your changes
+- Make sure they work as expected
+- Run cargo clippy and apply changes, then run cargo fmt
+- Push to your fork, and then open a pull request
+
+We will review to make sure the steps have been completed as expected and the changes you've applied are as described, along with checking for any malicious code. <br>
+Once your pull request is approved, it will be merged to the main branch and applied to the next update.
+
 # TODO
 
 This is a list of general big todo tasks, once these are complete I will consider making the CLI into stable and then introducing new features.
 
 - Make the CLI stable, there is a lot of unhandled edge cases
 - Make it a lot more Rust idiomatic, a lot of functions exit whenever they have error, make them return Results instead. Make the errors Enums instead of strings.
-- Implement goals
+- Introduce settings/configuration, specifically one where users can select a unit for their marks, such as %. Since the CLI is designed to be as adaptable as possible, it cannot assume grades are a percentage by default.

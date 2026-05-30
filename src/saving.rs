@@ -114,6 +114,49 @@ pub fn delete_all_data() {
     println!("Your data was deleted successfully.");
 }
 
+// deletes a subject from a save by name
+// TODO: make it also delete grades related to the subject
+pub fn delete_subject(name: String) {
+    // get existing data
+    let mut data = get_data();
+
+    // attempt to find subject
+    let subject_search = data.subjects.get(&name);
+    // determine if subject was found or not
+    if subject_search.is_some() {
+        data.subjects.remove(&name);
+        write_data(data);
+        println!("Successfully deleted the subject \"{}\"", &name);
+    } else {
+        println!(
+            "ERROR: Cannot delete subject \"{}\", as it doesn't exist.",
+            &name
+        );
+        exit(1);
+    }
+}
+
+// deletes a goal from a save by name
+pub fn delete_goal(name: String) {
+    // get existing data
+    let mut data = get_data();
+
+    // attempt to find goal
+    let goal_search = data.goals.get(&name);
+    // determine if goal was found or not
+    if goal_search.is_some() {
+        data.goals.remove(&name);
+        write_data(data);
+        println!("Successfully deleted the goal \"{}\"", &name);
+    } else {
+        println!(
+            "ERROR: Cannot delete goal \"{}\", as it doesn't exist.",
+            &name
+        );
+        exit(1);
+    }
+}
+
 pub fn save_subject(subject: Subject) {
     // get existing data
     let mut data = get_data();

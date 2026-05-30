@@ -1,13 +1,33 @@
-use dialoguer::{Input, theme::ColorfulTheme};
+use dialoguer::{Input, Select, theme::ColorfulTheme};
 use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, process::exit};
 
-use super::saving::{Save, save_subject};
+use super::saving::{Save, get_data, save_subject};
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Subject {
     pub name: String,
     pub value: f32,
+}
+
+// A subject select menu which inputs a list of subjects and returns the subject the user selected or nothing if the subject doesn't exist for whatever reason
+pub fn prompt_select_subject(subjects: &Vec<Subject>) -> Option<Subject> {
+    let mut choices: Vec<String> = vec![];
+
+    for subject in subjects {
+        choices.push(subject.name.clone());
+    }
+
+    let subject_selection_menu = Select::with_theme(&ColorfulTheme::default())
+        .with_prompt("Select a subject to delete")
+        .items(&choices)
+        .default(0)
+        .interact()
+        .unwrap();
+
+    let choice = subjects.get(subject_selection_menu);
+
+    choice.cloned()
 }
 
 // Prompt users to add a subject
@@ -52,9 +72,17 @@ pub fn prompt_grades(subjects: Vec<Subject>) -> HashMap<String, f32> {
     // prompt for each one and append it to a vector
     for subject in subjects {
         let prompt = format!("{} Grade (number)", subject.name);
+        // find any existing grades for the subject in save, if not then ignore it
+        let data = get_data();
+        let grade = data.grades.get(&subject.name);
+        let grade_default: String = match grade {
+            Some(v) => v.to_string(),
+            None => "".to_string(),
+        };
 
         let grade_input: String = Input::with_theme(&ColorfulTheme::default())
             .with_prompt(prompt)
+            .default(grade_default)
             .interact_text()
             .unwrap();
 
@@ -104,9 +132,9 @@ pub struct SubjectWithGrade {
     pub grade: f32,
 }
 
-pub fn subjects_with_grades(save: Save) -> Vec<SubjectWithGrade> {
-    let subjects: Vec<Subject> = save.subjects.into_values().collect();
-    let grades = save.grades;
+pub fn subjects_with_grades(save: &Save) -> Vec<SubjectWithGrade> {
+    let subjects: Vec<Subject> = save.subjects.clone().into_values().collect();
+    let grades = save.grades.clone();
     let mut subject_and_grades: Vec<SubjectWithGrade> = vec![];
 
     // go through each subject, find its grade and add it to the subject_and_grades vector

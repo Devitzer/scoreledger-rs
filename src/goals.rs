@@ -1,6 +1,6 @@
 use std::process::exit;
 
-use dialoguer::{Input, theme::ColorfulTheme};
+use dialoguer::{Input, Select, theme::ColorfulTheme};
 use serde::{Deserialize, Serialize};
 
 use crate::saving::save_goal;
@@ -9,6 +9,26 @@ use crate::saving::save_goal;
 pub struct Goal {
     pub name: String,
     pub threshold: f32,
+}
+
+// A goal select menu which inputs a list of goals and returns the goal the user selected or nothing if the goal doesn't exist for whatever reason
+pub fn prompt_select_goal(goals: &Vec<Goal>) -> Option<Goal> {
+    let mut choices: Vec<String> = vec![];
+
+    for goal in goals {
+        choices.push(goal.name.clone());
+    }
+
+    let goal_selection_menu = Select::with_theme(&ColorfulTheme::default())
+        .with_prompt("Select a goal to delete")
+        .items(&choices)
+        .default(0)
+        .interact()
+        .unwrap();
+
+    let choice = goals.get(goal_selection_menu);
+
+    choice.cloned()
 }
 
 pub fn prompt_goal(save: bool) -> Goal {
