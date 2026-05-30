@@ -1,4 +1,4 @@
-use dialoguer::{Select, theme::ColorfulTheme};
+use dialoguer::{Confirm, Select, theme::ColorfulTheme};
 use std::process::exit;
 
 use scoreledger::{calculate_mean, goals, saving, subject};
@@ -9,13 +9,14 @@ fn main() {
         "Enter grades",
         "Set a goal",
         "View report card",
+        "Delete data",
         "Exit",
     ];
 
     let selection_menu = Select::with_theme(&ColorfulTheme::default())
         .with_prompt("Scoreledger - Select an option")
         .items(&selections[..])
-        .default(4)
+        .default(0)
         .interact()
         .unwrap();
 
@@ -48,24 +49,44 @@ fn main() {
         todo!();
     } else if choice == "View report card" {
         let data = saving::get_data();
+
+        // check each subject that exists and see if a grade exists for it, returns an error saying the subject that is missing a grade
+        subject::verify_grades(&data).unwrap_or_else(|subject| {
+            println!("ERROR: The subject \"{}\" is missing a grade. Please enter grades before viewing report card.", subject);
+            exit(1);
+        });
+
         let subjects_with_grades = subject::subjects_with_grades(data);
 
         // go through each subject and grade and display it to the user
         for subject_and_grade in &subjects_with_grades {
             println!(
-                "{}: {}",
+                "{}: {:.2}",
                 subject_and_grade.subject.name, subject_and_grade.grade
             );
         }
 
         // display mean of report card to user
         let mean = calculate_mean::calculate_report_mean(subjects_with_grades);
-        println!("Report Card Mean: {}", mean);
+        println!("Report Card Mean: {:.2}", mean);
 
         // TODO: determine if goals are met
     } else if choice == "Exit" {
         println!("Exiting...");
         exit(0);
+    } else if choice == "Delete data" {
+        // confirm user wants to delete data
+        let confirmation = Confirm::with_theme(&ColorfulTheme::default())
+            .with_prompt("Do you really want to continue?")
+            .default(true)
+            .interact()
+            .unwrap();
+        // delete stuff
+        if confirmation {
+            saving::delete_all_data();
+        } else {
+            println!("Your data has not been deleted.");
+        };
     } else if choice == "DEBUG" {
         println!("nothing to see");
     }

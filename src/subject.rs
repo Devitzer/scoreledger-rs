@@ -44,6 +44,7 @@ pub fn prompt_subject(save: bool) -> Subject {
 }
 
 // Prompt users to enter grades based on subjects
+// TODO: move grade logic to it's own file (it's starting to become of decent size)
 
 pub fn prompt_grades(subjects: Vec<Subject>) -> HashMap<String, f32> {
     let mut grades: HashMap<String, f32> = HashMap::new();
@@ -72,6 +73,22 @@ pub fn prompt_grades(subjects: Vec<Subject>) -> HashMap<String, f32> {
     grades
 }
 
+pub fn verify_grades(save: &Save) -> Result<(), String> {
+    // convert subjects into vector
+    let subjects: Vec<Subject> = save.subjects.clone().into_values().collect();
+
+    for subject in subjects {
+        match save.grades.get(&subject.name) {
+            Some(_) => {
+                continue;
+            }
+            None => return Err(subject.name),
+        };
+    }
+
+    Ok(())
+}
+
 // returns subjects with a corresponding grade as a hashmap (to make it easier to print)
 pub struct SubjectWithGrade {
     pub subject: Subject,
@@ -86,6 +103,7 @@ pub fn subjects_with_grades(save: Save) -> Vec<SubjectWithGrade> {
     // go through each subject, find its grade and add it to the subject_and_grades vector
     for subject in subjects {
         let grade_for_subject = grades.get(&subject.name).unwrap_or_else(|| {
+            // this situation usually shouldn't happen, but just incase
             println!(
                 "ERROR: Grade missing for subject {}, please run the enter grades function.",
                 subject.name

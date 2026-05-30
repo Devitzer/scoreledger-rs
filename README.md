@@ -45,3 +45,11 @@ To exit, you select the "Exit" option in the select menu, this one is self-expla
 ## Delete a subject
 
 **TO BE ADDED**
+
+# TODO
+
+This is a list of general big todo tasks, once these are complete I will consider making the CLI into stable and then introducing new features.
+
+- Make the CLI stable, there is a lot of unhandled edge cases
+- Make it more Rust idiomatic, a lot of functions exit whenever they have error, make them return Results instead.
+- Implement goals
