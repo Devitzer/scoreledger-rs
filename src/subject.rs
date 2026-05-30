@@ -1,8 +1,10 @@
 use dialoguer::{Input, Select, theme::ColorfulTheme};
 use serde::{Deserialize, Serialize};
-use std::{collections::HashMap, process::exit};
+use std::{process::exit};
 
-use super::saving::{Save, get_data, save_subject};
+use super::errors::ScoreledgerSubjectError;
+
+use super::saving::{save_subject};
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Subject {
@@ -31,7 +33,7 @@ pub fn prompt_select_subject(subjects: &Vec<Subject>) -> Option<Subject> {
 }
 
 // Prompt users to add a subject
-pub fn prompt_subject(save: bool) -> Subject {
+pub fn prompt_subject(save: bool) -> Result<Subject, ScoreledgerSubjectError> {
     let subject_name_input: String = Input::with_theme(&ColorfulTheme::default())
         .with_prompt("Name of subject:".to_string())
         .interact_text()
@@ -45,8 +47,7 @@ pub fn prompt_subject(save: bool) -> Subject {
     let subject_weight_float = match subject_weight_input.parse::<f32>() {
         Ok(v) => v,
         Err(_) => {
-            println!("ERROR: The weight that you input must be a number, decimals allowed.");
-            exit(1);
+            return Err(ScoreledgerSubjectError::NaNWeight)
         }
     };
 
@@ -56,107 +57,14 @@ pub fn prompt_subject(save: bool) -> Subject {
     };
 
     if save {
-        // save logic
-        save_subject(subject.clone());
-    }
+        // save logic, the error here should be that the subject already exists
+        match save_subject(subject.clone()) {
+            Ok(_) => {}
+            Err(e) => return Err(e)
+        }
+    };
 
-    subject
-}
-
-// Prompt users to enter grades based on subjects
-// TODO: move grade logic to it's own file (it's starting to become of decent size)
-
-pub fn prompt_grades(subjects: Vec<Subject>) -> HashMap<String, f32> {
-    let mut grades: HashMap<String, f32> = HashMap::new();
-
-    // prompt for each one and append it to a vector
-    for subject in subjects {
-        let prompt = format!("{} Grade (number)", subject.name);
-        // find any existing grades for the subject in save, if not then ignore it
-        let data = get_data();
-        let grade = data.grades.get(&subject.name);
-        let grade_default: String = match grade {
-            Some(v) => v.to_string(),
-            None => "".to_string(),
-        };
-
-        let grade_input: String = Input::with_theme(&ColorfulTheme::default())
-            .with_prompt(prompt)
-            .default(grade_default)
-            .interact_text()
-            .unwrap();
-
-        let grade_as_float = match grade_input.parse::<f32>() {
-            Ok(v) => v,
-            Err(_) => {
-                println!("ERROR: The grade that you input must be a number, decimals allowed.");
-                exit(1);
-            }
-        };
-
-        grades.insert(subject.name, grade_as_float);
-    }
-
-    // return the vector of grades, their position should correspond to the subject's position in the array of subjects
-    grades
-}
-
-pub fn verify_grades(save: &Save) -> Result<(), String> {
-    // convert subjects into vector
-    let subjects: Vec<Subject> = save.subjects.clone().into_values().collect();
-
-    if subjects.is_empty() {
-        return Err("There is no grades to check! Please add a subject and enter grades for it to view report card!".to_string());
-    }
-
-    for subject in subjects {
-        match save.grades.get(&subject.name) {
-            Some(_) => {
-                continue;
-            }
-            None => {
-                return Err(format!(
-                    "ERROR: The subject \"{}\" is missing a grade! Please enter grades before attempting to view report card.",
-                    &subject.name
-                ));
-            }
-        };
-    }
-
-    Ok(())
-}
-
-// returns subjects with a corresponding grade as a hashmap (to make it easier to print)
-pub struct SubjectWithGrade {
-    pub subject: Subject,
-    pub grade: f32,
-}
-
-pub fn subjects_with_grades(save: &Save) -> Vec<SubjectWithGrade> {
-    let subjects: Vec<Subject> = save.subjects.clone().into_values().collect();
-    let grades = save.grades.clone();
-    let mut subject_and_grades: Vec<SubjectWithGrade> = vec![];
-
-    // go through each subject, find its grade and add it to the subject_and_grades vector
-    for subject in subjects {
-        let grade_for_subject = grades.get(&subject.name).unwrap_or_else(|| {
-            // this situation usually shouldn't happen, but just incase
-            println!(
-                "ERROR: Grade missing for subject {}, please run the enter grades function.",
-                subject.name
-            );
-            exit(1);
-        });
-
-        let subject_with_grade = SubjectWithGrade {
-            subject,
-            grade: *grade_for_subject,
-        };
-
-        subject_and_grades.push(subject_with_grade);
-    }
-
-    subject_and_grades
+    Ok(subject)
 }
 
 // Quebec Secondary III default (2026)

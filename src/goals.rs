@@ -1,9 +1,8 @@
-use std::process::exit;
-
 use dialoguer::{Input, Select, theme::ColorfulTheme};
 use serde::{Deserialize, Serialize};
 
-use crate::saving::save_goal;
+use crate::errors::{ScoreledgerGoalError};
+use crate::saving::{save_goal};
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Goal {
@@ -31,7 +30,7 @@ pub fn prompt_select_goal(goals: &Vec<Goal>) -> Option<Goal> {
     choice.cloned()
 }
 
-pub fn prompt_goal(save: bool) -> Goal {
+pub fn prompt_goal(save: bool) -> Result<Goal, ScoreledgerGoalError> {
     let goal_name_input: String = Input::with_theme(&ColorfulTheme::default())
         .with_prompt("Name of goal:".to_string())
         .interact_text()
@@ -45,8 +44,7 @@ pub fn prompt_goal(save: bool) -> Goal {
     let goal_threshold_float = match goal_threshold_input.parse::<f32>() {
         Ok(v) => v,
         Err(_) => {
-            println!("ERROR: The threshold that you input must be a number, decimals allowed.");
-            exit(1);
+            return Err(ScoreledgerGoalError::NaNThreshold)
         }
     };
 
@@ -60,5 +58,5 @@ pub fn prompt_goal(save: bool) -> Goal {
         save_goal(goal.clone());
     }
 
-    goal
+    Ok(goal)
 }

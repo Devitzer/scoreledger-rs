@@ -1,3 +1,15 @@
+# v0.4.0 (05/31/2026)
+
+The backend of Scoreledger has been partially rebuilt.
+
+## Added
+- New error messages, they're easier to read and more precise.
+
+## Changed
+- The backend of Scoreledger has been partially rebuilt. This is to ensure that functions related to working with subjects, goals, grades, saves, etc are dedicated to only that, leaving everything with logging to be handled by the CLI.
+- Made the code more idiomatic. Less process::exit functions, use Result instead.
+- Logic related to handling grades moved to it's own file (it was formerly in the subjects file.)
+
 # v0.3.1 (05/30/2026)
 
 ## Fixes

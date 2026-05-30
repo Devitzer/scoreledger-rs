@@ -2,7 +2,7 @@
 // it uses an array of subjects and then determines your grade with a weighted mean formula
 // for the second argument, the grade's position in the array should correspond to the subject's position in that array
 
-use super::subject::SubjectWithGrade;
+use super::grades::SubjectWithGrade;
 
 pub fn calculate_report_mean(subjects_with_grades: Vec<SubjectWithGrade>) -> f32 {
     let mut total_grade_value: f32 = 0.0;

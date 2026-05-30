@@ -1,7 +1,7 @@
 use dialoguer::{Confirm, Select, theme::ColorfulTheme};
 use std::process::exit;
 
-use scoreledger::{calculate_mean, goals, saving, subject};
+use scoreledger::{calculate_mean, goals, grades, saving, subject};
 
 fn main() {
     let selections = &[
@@ -37,7 +37,7 @@ fn main() {
         let data = saving::get_data();
         let subjects: Vec<subject::Subject> = data.subjects.into_values().collect();
 
-        let grades = subject::prompt_grades(subjects);
+        let grades = grades::prompt_grades(subjects);
         if grades.is_empty() {
             println!(
                 "ERROR: There are no subjects that you can enter grades for! Add a new subject!"
@@ -76,12 +76,12 @@ fn main() {
         let data = saving::get_data();
 
         // check each subject that exists and see if a grade exists for it, returns an error saying the subject that is missing a grade
-        subject::verify_grades(&data).unwrap_or_else(|msg| {
+        grades::verify_grades(&data).unwrap_or_else(|msg| {
             println!("{}", msg);
             exit(1);
         });
 
-        let subjects_with_grades = subject::subjects_with_grades(&data);
+        let subjects_with_grades = grades::subjects_with_grades(&data);
 
         // go through each subject and grade and display it to the user
         for subject_and_grade in &subjects_with_grades {
