@@ -38,6 +38,12 @@ fn main() {
         let subjects: Vec<subject::Subject> = data.subjects.into_values().collect();
 
         let grades = subject::prompt_grades(subjects);
+        if grades.is_empty() {
+            println!(
+                "ERROR: There are no subjects that you can enter grades for! Add a new subject!"
+            );
+            exit(1);
+        }
         // save grades
         saving::save_grades(grades);
         println!("Grades entered successfully! Your report card is ready to view.");
@@ -51,8 +57,8 @@ fn main() {
         let data = saving::get_data();
 
         // check each subject that exists and see if a grade exists for it, returns an error saying the subject that is missing a grade
-        subject::verify_grades(&data).unwrap_or_else(|subject| {
-            println!("ERROR: The subject \"{}\" is missing a grade. Please enter grades before viewing report card.", subject);
+        subject::verify_grades(&data).unwrap_or_else(|msg| {
+            println!("{}", msg);
             exit(1);
         });
 

@@ -8,9 +8,12 @@
 
 ## Changed
 - "View report card" option now checks whether grades exist for all subjects before showing.
+- "View report card" handles the situation where no data exists more clearly.
 - Grade values on your report card now only show two decimal places to avoid large numbers being displayed.
 
 ## Bug Fixes
+
+- Fixed a bug where data was being deleted everytime you try to add data.
 
 # v0.1.0 (05/29/2026)
 

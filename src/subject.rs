@@ -77,12 +77,21 @@ pub fn verify_grades(save: &Save) -> Result<(), String> {
     // convert subjects into vector
     let subjects: Vec<Subject> = save.subjects.clone().into_values().collect();
 
+    if subjects.is_empty() {
+        return Err("There is no grades to check! Please add a subject and enter grades for it to view report card!".to_string());
+    }
+
     for subject in subjects {
         match save.grades.get(&subject.name) {
             Some(_) => {
                 continue;
             }
-            None => return Err(subject.name),
+            None => {
+                return Err(format!(
+                    "ERROR: The subject \"{}\" is missing a grade! Please enter grades before attempting to view report card.",
+                    &subject.name
+                ));
+            }
         };
     }
 

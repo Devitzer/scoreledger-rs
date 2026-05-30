@@ -34,7 +34,7 @@ pub fn get_data() -> Save {
         .read(true)
         .write(true)
         .create(true)
-        .truncate(true)
+        .truncate(false)
         .open(&save_dir)
         .expect("Failed to open data file, the CLI may not have permissions.");
 
@@ -68,6 +68,8 @@ pub fn write_data(data: Save) {
     let json = serde_json::to_string_pretty(&data).unwrap();
     let mut save_dir = get_save_dir();
     save_dir.push("data.json");
+    // debug line
+    // println!("Saving to: {:?}", save_dir);
 
     fs::write(save_dir, json)
         .expect("ERROR: Failed to save data, the CLI may not have necessary permissions.");
