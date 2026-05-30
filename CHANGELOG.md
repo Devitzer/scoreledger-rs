@@ -1,3 +1,8 @@
+# v0.3.1 (05/30/2026)
+
+## Fixes
+- Adjust README.md to reflect new menu options, and change the order slightly.
+
 # v0.3.0 (05/30/2026)
 
 Goals are now fully implemented. The next goal is to make the code more Rust idiomatic and make Scoreledger's function more library friendly (even though they are not really intended to be used).

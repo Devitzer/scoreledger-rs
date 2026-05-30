@@ -32,19 +32,36 @@ To add a goal, you select the "Set a goal" option in the select menu, it will pr
 To view your report card, you select the "View report card" option in the select menu, it shows you:
 - Your grade value for each class
 - The mean of your report card (using the weights of the class)
-- Whether your goals were met (**TO BE ADDED**)
+- Whether your goals were met
+
+## Delete a goal
+
+To delete a goal, you select the "Delete a goal" option in the select menu. It will prompt you for:
+- The goal you want to delete
+- A confirmation that you want to delete the goal
+
+Once confirmed, the goal will be removed from the data file.
+
+## Delete a subject
+
+To delete a subject, you select the "Delete a subject" option in the select menu. It will prompt you for:
+- The subject you want to delete
+- A confirmation that you want to delete the subject
+
+Once confirmed, the subject will be removed from the data file. (**AS OF v0.3.1, GRADES FOR THE SUBJECT ARE NOT DELETED YET, THIS IS PLANNED VERY SOON**)
+
+## Delete all data
+
+To delete all of your data, which includes:
+- All subjects
+- All grades
+- All goals
+
+You must select the "Delete all data" option in the select menu. It will prompt you with a confirmation to ensure whether you want to delete all of your data. Please note that this deletes the save file, and it cannot be recovered once confirmed.
 
 ## Exit
 
 To exit, you select the "Exit" option in the select menu, this one is self-explanatory.
-
-## Delete a goal
-
-**TO BE ADDED**
-
-## Delete a subject
-
-**TO BE ADDED**
 
 # Versioning
 
