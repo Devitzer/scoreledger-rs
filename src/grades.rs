@@ -3,20 +3,23 @@ use std::collections::HashMap;
 use dialoguer::Input;
 use dialoguer::theme::ColorfulTheme;
 
-use super::errors::{ScoreledgerGradeError};
+use super::errors::ScoreledgerGradeError;
 
-use super::subject::Subject;
 use super::saving;
+use super::subject::Subject;
 
 // Prompt users to enter grades based on subjects
-pub fn prompt_grades(subjects: Vec<Subject>) -> Result<HashMap<String, f32>, ScoreledgerGradeError> {
+pub fn prompt_grades(
+    subjects: Vec<Subject>,
+) -> Result<HashMap<String, f32>, ScoreledgerGradeError> {
     let mut grades: HashMap<String, f32> = HashMap::new();
 
     // prompt for each one and append it to a vector
     for subject in subjects {
         let prompt = format!("{} Grade (number)", subject.name);
         // find any existing grades for the subject in save, if not then ignore it
-        let data = saving::get_data();
+        let data = saving::get_data()
+            .expect("Unexpected Error: Failed to load save data to determine existing grades list");
         let grade = data.grades.get(&subject.name);
         let grade_default: String = match grade {
             Some(v) => v.to_string(),
@@ -31,9 +34,7 @@ pub fn prompt_grades(subjects: Vec<Subject>) -> Result<HashMap<String, f32>, Sco
 
         let grade_as_float = match grade_input.parse::<f32>() {
             Ok(v) => v,
-            Err(_) => {
-                return Err(ScoreledgerGradeError::NaNGrade)
-            }
+            Err(_) => return Err(ScoreledgerGradeError::NaNGrade),
         };
 
         grades.insert(subject.name, grade_as_float);
@@ -56,9 +57,7 @@ pub fn verify_grades(save: &saving::Save) -> Result<(), ScoreledgerGradeError> {
             Some(_) => {
                 continue;
             }
-            None => {
-                return Err(ScoreledgerGradeError::GradeMissing(subject.name.clone()))
-            }
+            None => return Err(ScoreledgerGradeError::GradeMissing(subject.name.clone())),
         };
     }
 
@@ -71,7 +70,9 @@ pub struct SubjectWithGrade {
     pub grade: f32,
 }
 
-pub fn subjects_with_grades(save: &saving::Save) -> Result<Vec<SubjectWithGrade>, ScoreledgerGradeError> {
+pub fn subjects_with_grades(
+    save: &saving::Save,
+) -> Result<Vec<SubjectWithGrade>, ScoreledgerGradeError> {
     let subjects: Vec<Subject> = save.subjects.clone().into_values().collect();
     let grades = save.grades.clone();
     let mut subject_and_grades: Vec<SubjectWithGrade> = vec![];

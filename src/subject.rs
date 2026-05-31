@@ -1,10 +1,9 @@
 use dialoguer::{Input, Select, theme::ColorfulTheme};
 use serde::{Deserialize, Serialize};
-use std::{process::exit};
 
 use super::errors::ScoreledgerSubjectError;
 
-use super::saving::{save_subject};
+use super::saving::save_subject;
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Subject {
@@ -12,12 +11,16 @@ pub struct Subject {
     pub value: f32,
 }
 
-// A subject select menu which inputs a list of subjects and returns the subject the user selected or nothing if the subject doesn't exist for whatever reason
-pub fn prompt_select_subject(subjects: &Vec<Subject>) -> Option<Subject> {
+// A subject select menu which inputs a list of subjects and returns the subject the user selected
+pub fn prompt_select_subject(subjects: &Vec<Subject>) -> Result<Subject, ScoreledgerSubjectError> {
     let mut choices: Vec<String> = vec![];
 
     for subject in subjects {
         choices.push(subject.name.clone());
+    }
+
+    if choices.is_empty() {
+        return Err(ScoreledgerSubjectError::NoSubjectExists);
     }
 
     let subject_selection_menu = Select::with_theme(&ColorfulTheme::default())
@@ -27,9 +30,9 @@ pub fn prompt_select_subject(subjects: &Vec<Subject>) -> Option<Subject> {
         .interact()
         .unwrap();
 
-    let choice = subjects.get(subject_selection_menu);
+    let choice = subjects.get(subject_selection_menu).expect("Unexpected Error: Subject selected in selection menu cannot be found in data (very unexpected, please report)");
 
-    choice.cloned()
+    Ok(choice.clone())
 }
 
 // Prompt users to add a subject
@@ -46,9 +49,7 @@ pub fn prompt_subject(save: bool) -> Result<Subject, ScoreledgerSubjectError> {
 
     let subject_weight_float = match subject_weight_input.parse::<f32>() {
         Ok(v) => v,
-        Err(_) => {
-            return Err(ScoreledgerSubjectError::NaNWeight)
-        }
+        Err(_) => return Err(ScoreledgerSubjectError::NaNWeight),
     };
 
     let subject = Subject {
@@ -60,7 +61,7 @@ pub fn prompt_subject(save: bool) -> Result<Subject, ScoreledgerSubjectError> {
         // save logic, the error here should be that the subject already exists
         match save_subject(subject.clone()) {
             Ok(_) => {}
-            Err(e) => return Err(e)
+            Err(e) => return Err(e),
         }
     };
 

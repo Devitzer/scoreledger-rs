@@ -86,6 +86,8 @@ Once your pull request is approved, it will be merged to the main branch and app
 
 This is a list of general big todo tasks, once these are complete I will consider making the CLI into stable and then introducing new features.
 
-- Make the CLI stable, there is a lot of unhandled edge cases
-- Make it a lot more Rust idiomatic, a lot of functions exit whenever they have error, make them return Results instead. Make the errors Enums instead of strings.
+- Make the CLI stable, there are some unhandled edge cases
+- Complete the TODO tasks littered around the files
+- Potentially add documentation to the helper functions (if users wanted to use it for whatever reason)
+- Implement a system where users can make default subject lists, publish them to GitHub and they can be imported via the CLI.
 - Introduce settings/configuration, specifically one where users can select a unit for their marks, such as %. Since the CLI is designed to be as adaptable as possible, it cannot assume grades are a percentage by default.

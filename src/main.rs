@@ -1,7 +1,7 @@
 use dialoguer::{Confirm, Select, theme::ColorfulTheme};
 use std::process::exit;
 
-use scoreledger::{calculate_mean, goals, grades, saving, subject};
+use scoreledger::{calculate_mean, errors, goals, grades, saving, subject};
 
 fn main() {
     let selections = &[
@@ -26,7 +26,14 @@ fn main() {
 
     // determine command to be done
     if choice == "Add a subject" {
-        let subject = subject::prompt_subject(true);
+        let subject = match subject::prompt_subject(true) {
+            Ok(subject) => subject,
+            Err(e) => {
+                let err_msg = errors::default_subject_error(e);
+                eprintln!("{}", err_msg);
+                return;
+            }
+        };
 
         println!(
             "Your new subject \"{}\" was added successfully.",
@@ -34,28 +41,52 @@ fn main() {
         );
     } else if choice == "Enter grades" {
         // get data
-        let data = saving::get_data();
+        let data = saving::get_data()
+            .expect("Unexpected Error: Failed to load save to get subjects list to add grades to");
         let subjects: Vec<subject::Subject> = data.subjects.into_values().collect();
 
-        let grades = grades::prompt_grades(subjects);
+        let grades = match grades::prompt_grades(subjects) {
+            Ok(grade_hashmap) => grade_hashmap,
+            Err(e) => {
+                let err_msg = errors::default_grade_error(e);
+                eprintln!("{}", err_msg);
+                return;
+            }
+        };
         if grades.is_empty() {
-            println!(
+            eprintln!(
                 "ERROR: There are no subjects that you can enter grades for! Add a new subject!"
             );
-            exit(1);
+            return;
         }
         // save grades
         saving::save_grades(grades);
         println!("Grades entered successfully! Your report card is ready to view.");
     } else if choice == "Set a goal" {
-        let goal = goals::prompt_goal(true);
+        let goal = match goals::prompt_goal(true) {
+            Ok(goal) => goal,
+            Err(e) => {
+                let err_msg = errors::default_goal_error(e);
+                eprintln!("{}", err_msg);
+                return;
+            }
+        };
 
         println!("Your new goal \"{}\" was added successfully.", &goal.name);
     } else if choice == "Delete a goal" {
-        let data = saving::get_data();
+        let data = saving::get_data().expect(
+            "Unexpected Error: Failed to load save to get goals list to select one to delete",
+        );
         let goals: Vec<goals::Goal> = data.goals.into_values().collect();
 
-        let goal_selection = goals::prompt_select_goal(&goals).expect("ERROR: The goal you selected no longer exists. This is an unexpected error and may mean your data is partially corrupted.");
+        let goal_selection = match goals::prompt_select_goal(&goals) {
+            Ok(v) => v,
+            Err(e) => {
+                let err_msg = errors::default_goal_error(e);
+                eprintln!("{}", err_msg);
+                return;
+            }
+        };
         let prompt = format!(
             "Are you sure you want to delete the goal \"{}\"?",
             &goal_selection.name
@@ -68,20 +99,32 @@ fn main() {
             .unwrap();
 
         if confirmation {
-            saving::delete_goal(goal_selection.name);
+            saving::delete_goal(&goal_selection.name)
+                .expect("Unexpected Error: Failed to delete goal");
+            println!("Sucessfully deleted the goal \"{}\".", &goal_selection.name);
         } else {
             println!("Your data has not been deleted.");
         }
     } else if choice == "View report card" {
-        let data = saving::get_data();
+        let data =
+            saving::get_data().expect("Unexpected Error: Failed to load data for report card");
 
         // check each subject that exists and see if a grade exists for it, returns an error saying the subject that is missing a grade
-        grades::verify_grades(&data).unwrap_or_else(|msg| {
-            println!("{}", msg);
+        grades::verify_grades(&data).unwrap_or_else(|e| {
+            let err_msg = errors::default_grade_error(e);
+            eprintln!("{}", err_msg);
+            // uses exit instead of return, or else it will repeat the error message twice
             exit(1);
         });
 
-        let subjects_with_grades = grades::subjects_with_grades(&data);
+        let subjects_with_grades = match grades::subjects_with_grades(&data) {
+            Ok(v) => v,
+            Err(e) => {
+                let err_msg = errors::default_grade_error(e);
+                eprintln!("{}", err_msg);
+                return;
+            }
+        };
 
         // go through each subject and grade and display it to the user
         for subject_and_grade in &subjects_with_grades {
@@ -124,15 +167,23 @@ fn main() {
             .unwrap();
         // delete stuff
         if confirmation {
-            saving::delete_all_data();
+            saving::delete_all_data().expect("Unexpected Error: Failed to delete data");
+            println!("Your data has been deleted successfully.");
         } else {
             println!("Your data has not been deleted.");
         };
     } else if choice == "Delete a subject" {
-        let data = saving::get_data();
+        let data = saving::get_data().expect("Unexpected Error: Failed to load save to get a list of subjects to select one for deletion");
         let subjects: Vec<subject::Subject> = data.subjects.into_values().collect();
 
-        let subject_selection = subject::prompt_select_subject(&subjects).expect("ERROR: The subject you selected no longer exists. This is an unexpected error and may mean your data is partially corrupted.");
+        let subject_selection = match subject::prompt_select_subject(&subjects) {
+            Ok(v) => v,
+            Err(e) => {
+                let err_msg = errors::default_subject_error(e);
+                eprintln!("{}", err_msg);
+                return;
+            }
+        };
         let prompt = format!(
             "Are you sure you want to delete the subject \"{}\"?",
             &subject_selection.name
@@ -145,7 +196,12 @@ fn main() {
             .unwrap();
 
         if confirmation {
-            saving::delete_subject(subject_selection.name);
+            saving::delete_subject(&subject_selection.name)
+                .expect("Unexpected Error: Failed to delete subject");
+            println!(
+                "The subject {} was deleted successfully.",
+                &subject_selection.name
+            );
         } else {
             println!("Your data has not been deleted.");
         }

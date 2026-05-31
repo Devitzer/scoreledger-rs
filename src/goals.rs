@@ -1,8 +1,8 @@
 use dialoguer::{Input, Select, theme::ColorfulTheme};
 use serde::{Deserialize, Serialize};
 
-use crate::errors::{ScoreledgerGoalError};
-use crate::saving::{save_goal};
+use crate::errors::ScoreledgerGoalError;
+use crate::saving::save_goal;
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Goal {
@@ -11,11 +11,15 @@ pub struct Goal {
 }
 
 // A goal select menu which inputs a list of goals and returns the goal the user selected or nothing if the goal doesn't exist for whatever reason
-pub fn prompt_select_goal(goals: &Vec<Goal>) -> Option<Goal> {
+pub fn prompt_select_goal(goals: &Vec<Goal>) -> Result<Goal, ScoreledgerGoalError> {
     let mut choices: Vec<String> = vec![];
 
     for goal in goals {
         choices.push(goal.name.clone());
+    }
+
+    if choices.is_empty() {
+        return Err(ScoreledgerGoalError::NoGoalExists);
     }
 
     let goal_selection_menu = Select::with_theme(&ColorfulTheme::default())
@@ -25,9 +29,9 @@ pub fn prompt_select_goal(goals: &Vec<Goal>) -> Option<Goal> {
         .interact()
         .unwrap();
 
-    let choice = goals.get(goal_selection_menu);
+    let choice = goals.get(goal_selection_menu).expect("Unexpected Error: Goal selected in selection menu cannot be found in data (very unexpected, please report)");
 
-    choice.cloned()
+    Ok(choice.clone())
 }
 
 pub fn prompt_goal(save: bool) -> Result<Goal, ScoreledgerGoalError> {
@@ -43,9 +47,7 @@ pub fn prompt_goal(save: bool) -> Result<Goal, ScoreledgerGoalError> {
 
     let goal_threshold_float = match goal_threshold_input.parse::<f32>() {
         Ok(v) => v,
-        Err(_) => {
-            return Err(ScoreledgerGoalError::NaNThreshold)
-        }
+        Err(_) => return Err(ScoreledgerGoalError::NaNThreshold),
     };
 
     let goal = Goal {
@@ -55,7 +57,7 @@ pub fn prompt_goal(save: bool) -> Result<Goal, ScoreledgerGoalError> {
 
     if save {
         // save logic
-        save_goal(goal.clone());
+        save_goal(goal.clone())?;
     }
 
     Ok(goal)

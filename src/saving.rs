@@ -5,14 +5,13 @@ use dirs::config_dir;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::io::Write;
-use std::process::exit;
 use std::{fs, path::PathBuf};
 
-use super::errors::{ScoreledgerGoalError, ScoreledgerSubjectError};
+use super::errors::{ScoreledgerFileError, ScoreledgerGoalError, ScoreledgerSubjectError};
 
+use super::errors;
 use super::goals::Goal;
 use super::subject::Subject;
-use super::errors;
 
 #[derive(Deserialize, Serialize)]
 pub struct Save {
@@ -30,7 +29,7 @@ fn get_save_dir() -> PathBuf {
     base_dir
 }
 
-pub fn get_data() -> Save {
+pub fn get_data() -> Result<Save, ScoreledgerFileError> {
     let mut save_dir = get_save_dir();
     save_dir.push("data.json");
     let save_file = fs::OpenOptions::new()
@@ -39,7 +38,7 @@ pub fn get_data() -> Save {
         .create(true)
         .truncate(false)
         .open(&save_dir)
-        .expect("Failed to open data file, the CLI may not have permissions.");
+        .map_err(errors::map_fs_error)?;
 
     let is_empty = match fs::metadata(&save_dir) {
         Ok(meta) => meta.len() == 0,
@@ -52,124 +51,116 @@ pub fn get_data() -> Save {
             .create(true)
             .truncate(true)
             .open(&save_dir)
-            .expect("ERROR: Failed to create ");
+            .map_err(errors::map_fs_error)?;
 
         let base_file = "{ \"subjects\": {}, \"goals\": {}, \"grades\": {} }".as_bytes();
 
-        file.write_all(base_file)
-            .expect("ERROR: Failed to initialize the data file, the CLI may not have permissions.");
+        file.write_all(base_file).map_err(errors::map_fs_error)?;
     };
 
-    let save: Save = serde_json::from_reader(save_file).expect("ERROR: Failed to load your saved information. The save file may not be structured as expected.");
+    let save: Save =
+        serde_json::from_reader(save_file).map_err(|_| ScoreledgerFileError::FailedToParseSave)?;
 
-    save
+    Ok(save)
 }
 
 // this assumes the data exists, because there isn't a situation where you can run this without data existing
 // TODO: make this not assume data exists
-pub fn write_data(data: Save) {
+pub fn write_data(data: Save) -> Result<(), ScoreledgerFileError> {
     let json = serde_json::to_string_pretty(&data).unwrap();
     let mut save_dir = get_save_dir();
     save_dir.push("data.json");
     // debug line
     // println!("Saving to: {:?}", save_dir);
 
-    fs::write(save_dir, json)
-        .expect("ERROR: Failed to save data, the CLI may not have necessary permissions.");
+    fs::write(save_dir, json).map_err(errors::map_fs_error)
 }
 
 // this deletes the directory of data pretty much
-pub fn delete_all_data() {
+pub fn delete_all_data() -> Result<(), ScoreledgerFileError> {
     let save_dir = get_save_dir();
 
-    let deletion = match fs::remove_dir_all(save_dir) {
+    match fs::remove_dir_all(save_dir) {
         Ok(_) => Ok(()),
         Err(e) => Err(errors::map_fs_error(e)),
-    };
-
-    deletion.unwrap_or_else(|err| {
-        // handle that ig
-    });
-
-    println!("Your data was deleted successfully.");
+    }
 }
 
 // deletes a subject from a save by name
-// TODO: make it also delete grades related to the subject
-pub fn delete_subject(name: String) -> Result<(), ScoreledgerSubjectError> {
+pub fn delete_subject(name: &String) -> Result<(), ScoreledgerSubjectError> {
     // get existing data
-    let mut data = get_data();
+    let mut data = get_data().expect("Unexpected error: Failed to load save for subject deletion");
 
     // attempt to find subject
-    let subject_search = data.subjects.get(&name);
+    let subject_search = data.subjects.get(name);
     // determine if subject was found or not
     if subject_search.is_some() {
-        data.subjects.remove(&name);
-        write_data(data);
-        println!("Successfully deleted the subject \"{}\"", &name);
+        data.subjects.remove(name);
+        // get grade for subject, ignore removing it if you cant find (since its already gone)
+        data.grades.remove(name);
+        write_data(data).expect("Unexpected Error: Failed to write data to save for removing the subject. The subject was not removed.");
         Ok(())
     } else {
-        Err(ScoreledgerSubjectError::SubjectDoesntExist(name))
+        Err(ScoreledgerSubjectError::SubjectDoesntExist(name.clone()))
     }
 }
 
 // deletes a goal from a save by name
-pub fn delete_goal(name: String) -> Result<(), ScoreledgerGoalError> {
+pub fn delete_goal(name: &String) -> Result<(), ScoreledgerGoalError> {
     // get existing data
-    let mut data = get_data();
+    let mut data = get_data().expect("Unexpected error: Failed to load save for goal deletion");
 
     // attempt to find goal
-    let goal_search = data.goals.get(&name);
+    let goal_search = data.goals.get(name);
     // determine if goal was found or not
     if goal_search.is_some() {
-        data.goals.remove(&name);
-        write_data(data);
-        println!("Successfully deleted the goal \"{}\"", &name);
+        data.goals.remove(name);
+        write_data(data).expect("Unexpected Error: Failed to write data to save for removing the goal. The goal was not removed.");
         Ok(())
     } else {
-        Err(ScoreledgerGoalError::GoalDoesntExist(name))
+        Err(ScoreledgerGoalError::GoalDoesntExist(name.clone()))
     }
 }
 
 pub fn save_subject(subject: Subject) -> Result<(), ScoreledgerSubjectError> {
     // get existing data
-    let mut data = get_data();
+    let mut data = get_data().expect("Unexpected Error: Failed to load save to add new subject");
 
     // add new data to it (ensure it doesn't already exist)
     if data.subjects.contains_key(&subject.name) {
-        return Err(ScoreledgerSubjectError::SubjectAlreadyExists)
+        return Err(ScoreledgerSubjectError::SubjectAlreadyExists);
     }
 
     data.subjects.insert(subject.name.clone(), subject);
 
     // save and finish
-    write_data(data);
+    write_data(data).expect("Unexpected Error: Failed to write data to save new subject");
     Ok(())
 }
 
 pub fn save_grades(grades: HashMap<String, f32>) {
     // get existing data
-    let mut data = get_data();
+    let mut data = get_data().expect("Unexpected Error: Failed to load save to enter grades");
 
     // overwrite data
     data.grades = grades;
 
     // save and finish
-    write_data(data);
+    write_data(data).expect("Unexpected Error: Failed to write data to save entered grades");
 }
 
 pub fn save_goal(goal: Goal) -> Result<(), ScoreledgerGoalError> {
     // get existing data
-    let mut data = get_data();
+    let mut data = get_data().expect("Unexpected Error: Failed to load save to add a goal");
 
     // add new data to it (ensure it doesn't already exist)
     if data.goals.contains_key(&goal.name) {
-        return Err(ScoreledgerGoalError::GoalAlreadyExists)
+        return Err(ScoreledgerGoalError::GoalAlreadyExists);
     }
 
     data.goals.insert(goal.name.clone(), goal);
 
     // save and finish
-    write_data(data);
+    write_data(data).expect("Unexpected Error: Failed to write data to save goal");
     Ok(())
 }
