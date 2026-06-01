@@ -7,6 +7,7 @@ pub enum ScoreledgerFileError {
     FileDirectoryNotEmpty,
     FileAlreadyExists, // the error here and the ones above are simply wrappers of io::ErrorKind errors.
     FileUnknownError(io::Error),
+    SaveDirectoryNotFound,
     FailedToParseSave, // usually because the save file is structured incorrectly
 }
 
@@ -33,7 +34,6 @@ pub enum ScoreledgerGradeError {
     NoSubjectsForGrades,  // when you want to enter grades but no subjects exist to enter grades for
 }
 
-// TODO: map io errors to scoreledger errors
 pub fn map_fs_error(e: io::Error) -> ScoreledgerFileError {
     match e.kind() {
         io::ErrorKind::NotFound => ScoreledgerFileError::FileNotFound,
@@ -52,7 +52,8 @@ pub fn default_fs_error(err: ScoreledgerFileError) -> String {
         ScoreledgerFileError::FileDirectoryNotEmpty => "ERROR: Cannot delete save directory, because it's not empty. (UNEXPECTED ERROR, PLEASE REPORT)".to_string(),
         ScoreledgerFileError::FileAlreadyExists => "ERROR: Attempted to recreate something that already exists. (UNEXPECTED ERROR, PLEASE REPORT)".to_string(),
         ScoreledgerFileError::FileUnknownError(e) => format!("ERROR: Unknown file-related error | {}", e),
-        ScoreledgerFileError::FailedToParseSave => "ERROR: Failed to parse save. The save file is likely partially corrrupted.".to_string()
+        ScoreledgerFileError::FailedToParseSave => "ERROR: Failed to parse save. The save file is likely partially corrrupted.".to_string(),
+        ScoreledgerFileError::SaveDirectoryNotFound => "ERROR: Failed to retrieve save directory.".to_string()
     }
 }
 

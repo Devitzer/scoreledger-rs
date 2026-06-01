@@ -1,3 +1,17 @@
+# v0.5.0 (05/31/2026)
+
+Completed a bunch of small TODO tasks.
+
+## Added
+- There is a new Settings menu, where you can configure certain options. There is currently one, where you can change the unit that appears after the score number.
+- Added new "Settings" section to Save struct, which is a HashMap where the key is the setting and the value is the setting's value. (to be completed)
+- Decimal scores will no longer show trailing zeros. (to be completed)
+- Completed TODO tasks labelled in source code (most were already complete but not removed)
+- New ScoreledgerFileError "SaveDirectoryNotFound", it is returned when the save directory can't be retrieved.
+
+## Bug Fixes
+- Failing to retrieve save directory now returns a more readable error.
+
 # v0.4.0 (05/31/2026)
 
 The backend of Scoreledger has been partially rebuilt. This is one major step to reaching stability.

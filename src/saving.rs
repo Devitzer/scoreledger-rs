@@ -1,5 +1,4 @@
 // handle everything related to saving persistent data, subjects, grades, and goals
-// TODO: add more errors for more cases other than "cli doesn't have permission"
 
 use dirs::config_dir;
 use serde::{Deserialize, Serialize};
@@ -18,19 +17,19 @@ pub struct Save {
     pub subjects: HashMap<String, Subject>,
     pub goals: HashMap<String, Goal>,
     pub grades: HashMap<String, f32>,
+    pub settings: HashMap<String, String>,
 }
 
-fn get_save_dir() -> PathBuf {
-    // TODO: put custom error here in the future
-    let mut base_dir = config_dir().unwrap();
+fn get_save_dir() -> Result<PathBuf, ScoreledgerFileError> {
+    let mut base_dir = config_dir().ok_or(ScoreledgerFileError::SaveDirectoryNotFound)?;
 
     base_dir.push("scoreledger_cli");
     fs::create_dir_all(&base_dir).unwrap();
-    base_dir
+    Ok(base_dir)
 }
 
 pub fn get_data() -> Result<Save, ScoreledgerFileError> {
-    let mut save_dir = get_save_dir();
+    let mut save_dir = get_save_dir().expect("Unexpected Error: Failed to retrieve save directory");
     save_dir.push("data.json");
     let save_file = fs::OpenOptions::new()
         .read(true)
@@ -65,10 +64,9 @@ pub fn get_data() -> Result<Save, ScoreledgerFileError> {
 }
 
 // this assumes the data exists, because there isn't a situation where you can run this without data existing
-// TODO: make this not assume data exists
 pub fn write_data(data: Save) -> Result<(), ScoreledgerFileError> {
     let json = serde_json::to_string_pretty(&data).unwrap();
-    let mut save_dir = get_save_dir();
+    let mut save_dir = get_save_dir().expect("Unexpected Error: Failed to retrieve save directory");
     save_dir.push("data.json");
     // debug line
     // println!("Saving to: {:?}", save_dir);
@@ -78,7 +76,7 @@ pub fn write_data(data: Save) -> Result<(), ScoreledgerFileError> {
 
 // this deletes the directory of data pretty much
 pub fn delete_all_data() -> Result<(), ScoreledgerFileError> {
-    let save_dir = get_save_dir();
+    let save_dir = get_save_dir().expect("Unexpected Error: Failed to retrieve save directory");
 
     match fs::remove_dir_all(save_dir) {
         Ok(_) => Ok(()),
