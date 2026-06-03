@@ -1,12 +1,15 @@
-# v0.5.0 (06/02/2026)
+# v0.5.0 (06/03/2026)
 
 Completed a bunch of small TODO tasks.
 
+## BREAKING CHANGES
+- The new Settings feature requires you to add a new field called "settings" to your save file. If you don't, you will get a FailedToParseSave error. You can also delete your data and re-enter it which will do the same thing.
+
 ## Added
 - There is a new Settings menu, where you can configure certain options. There is currently one, where you can change the unit that appears after the score number.
-- Added new "Settings" section to Save struct, which is a HashMap where the key is the setting and the value is the setting's value. (to be completed)
+- Added new "Settings" section to Save struct, which is a HashMap where the key is the setting and the value is the setting's value.
 - Decimal scores will no longer show trailing zeros.
-- Completed TODO tasks labelled in source code (most were already complete but not removed)
+- Completed TODO tasks labelled in source code
 - New ScoreledgerFileError "SaveDirectoryNotFound", it is returned when the save directory can't be retrieved.
 
 ## Bug Fixes

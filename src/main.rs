@@ -127,30 +127,34 @@ fn main() {
             }
         };
 
+        // get user's score unit
+        let fallback_unit = String::new();
+        let score_unit = data.settings.get("score_unit").unwrap_or(&fallback_unit);
+
         // go through each subject and grade and display it to the user
         for subject_and_grade in &subjects_with_grades {
             println!(
-                "{}: {}",
-                subject_and_grade.subject.name, grades::format_float(subject_and_grade.grade)
+                "{}: {}{}",
+                subject_and_grade.subject.name, grades::format_float(subject_and_grade.grade), score_unit
             );
         }
 
         // display mean of report card to user
         let mean = calculate_mean::calculate_report_mean(subjects_with_grades);
-        println!("Report Card Mean: {}", grades::format_float(mean));
+        println!("Report Card Mean: {}{}", grades::format_float(mean), score_unit);
 
         // determine if goals are met
         let goal_vec: Vec<goals::Goal> = data.goals.into_values().collect();
         for goal in goal_vec {
             if mean >= goal.threshold {
                 println!(
-                    "Goal \"{}\" ({} Threshold): ✓",
-                    &goal.name, grades::format_float(goal.threshold)
+                    "Goal \"{}\" ({}{} Threshold): ✓",
+                    &goal.name, grades::format_float(goal.threshold), score_unit
                 );
             } else {
                 println!(
-                    "Goal \"{}\" ({:.2} Threshold): ✗",
-                    &goal.name, &goal.threshold
+                    "Goal \"{}\" ({}{} Threshold): ✗",
+                    &goal.name, grades::format_float(goal.threshold), score_unit
                 );
             }
         }

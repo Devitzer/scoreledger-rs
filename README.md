@@ -89,4 +89,7 @@ This is a list of general big todo tasks, once these are complete I will conside
 - Make the CLI stable, there are some unhandled edge cases
 - Convert all f32 values to f64 (0.6.0)
 - Implement a system where users can make default subject lists, publish them to GitHub and they can be imported via the CLI. (0.7.0)
+- Enforce number limits for scores and character limits for subjects and such
+- Sort subjects by alphabetical order and weight when viewing report card.
+- Add version of scoreledger to save file, and then create a migration option to migrate old saves to an up to date structure. (1.0.0)
 - Potentially add documentation to the helper functions (if users wanted to use it for whatever reason)
