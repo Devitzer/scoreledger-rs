@@ -94,3 +94,11 @@ pub fn subjects_with_grades(
 
     Ok(subject_and_grades)
 }
+
+// format a floating value for display
+pub fn format_float(value: f32) -> String {
+    format!("{:.2}", value)
+        .trim_end_matches('0')
+        .trim_end_matches('.')
+        .to_string()
+}

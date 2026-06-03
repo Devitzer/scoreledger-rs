@@ -52,7 +52,7 @@ pub fn get_data() -> Result<Save, ScoreledgerFileError> {
             .open(&save_dir)
             .map_err(errors::map_fs_error)?;
 
-        let base_file = "{ \"subjects\": {}, \"goals\": {}, \"grades\": {} }".as_bytes();
+        let base_file = "{ \"subjects\": {}, \"goals\": {}, \"grades\": {}, \"settings\": {} }".as_bytes();
 
         file.write_all(base_file).map_err(errors::map_fs_error)?;
     };
@@ -134,6 +134,18 @@ pub fn save_subject(subject: Subject) -> Result<(), ScoreledgerSubjectError> {
     // save and finish
     write_data(data).expect("Unexpected Error: Failed to write data to save new subject");
     Ok(())
+}
+
+// TODO: enforce a more specific setting structure in the future (other than mapping string keys to string values)
+pub fn save_setting(settings: HashMap<String, String>) {
+    // get existing data
+    let mut data = get_data().expect("Unexpected Error: Failed to load save to add new setting");
+
+    // overwrite data
+    data.settings = settings;
+
+    // save and finish
+    write_data(data).expect("Unexpected Error: Failed to write data to save new setting");
 }
 
 pub fn save_grades(grades: HashMap<String, f32>) {
