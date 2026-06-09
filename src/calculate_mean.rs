@@ -4,9 +4,9 @@
 
 use super::grades::SubjectWithGrade;
 
-pub fn calculate_report_mean(subjects_with_grades: Vec<SubjectWithGrade>) -> f32 {
-    let mut total_grade_value: f32 = 0.0;
-    let mut total_credits: f32 = 0.0;
+pub fn calculate_report_mean(subjects_with_grades: Vec<SubjectWithGrade>) -> f64 {
+    let mut total_grade_value: f64 = 0.0;
+    let mut total_credits: f64 = 0.0;
 
     // corresponds to a weighted mean, total_grade_value sets up the top, total_credits sets up the bottom
     for subject in subjects_with_grades {

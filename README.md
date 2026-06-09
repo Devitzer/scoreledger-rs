@@ -87,7 +87,6 @@ Once your pull request is approved, it will be merged to the main branch and app
 This is a list of general big todo tasks, once these are complete I will consider making the CLI into stable and then introducing new features.
 
 - Make the CLI stable, there are some unhandled edge cases
-- Convert all f32 values to f64 (0.6.0)
 - Implement a system where users can make default subject lists, publish them to GitHub and they can be imported via the CLI. (0.7.0)
 - Enforce number limits for scores and character limits for subjects and such
 - Sort subjects by alphabetical order and weight when viewing report card.

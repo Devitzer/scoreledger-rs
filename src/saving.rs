@@ -16,7 +16,7 @@ use super::subject::Subject;
 pub struct Save {
     pub subjects: HashMap<String, Subject>,
     pub goals: HashMap<String, Goal>,
-    pub grades: HashMap<String, f32>,
+    pub grades: HashMap<String, f64>,
     pub settings: HashMap<String, String>,
 }
 
@@ -52,7 +52,8 @@ pub fn get_data() -> Result<Save, ScoreledgerFileError> {
             .open(&save_dir)
             .map_err(errors::map_fs_error)?;
 
-        let base_file = "{ \"subjects\": {}, \"goals\": {}, \"grades\": {}, \"settings\": {} }".as_bytes();
+        let base_file =
+            "{ \"subjects\": {}, \"goals\": {}, \"grades\": {}, \"settings\": {} }".as_bytes();
 
         file.write_all(base_file).map_err(errors::map_fs_error)?;
     };
@@ -148,7 +149,7 @@ pub fn save_setting(settings: HashMap<String, String>) {
     write_data(data).expect("Unexpected Error: Failed to write data to save new setting");
 }
 
-pub fn save_grades(grades: HashMap<String, f32>) {
+pub fn save_grades(grades: HashMap<String, f64>) {
     // get existing data
     let mut data = get_data().expect("Unexpected Error: Failed to load save to enter grades");
 

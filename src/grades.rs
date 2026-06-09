@@ -11,8 +11,8 @@ use super::subject::Subject;
 // Prompt users to enter grades based on subjects
 pub fn prompt_grades(
     subjects: Vec<Subject>,
-) -> Result<HashMap<String, f32>, ScoreledgerGradeError> {
-    let mut grades: HashMap<String, f32> = HashMap::new();
+) -> Result<HashMap<String, f64>, ScoreledgerGradeError> {
+    let mut grades: HashMap<String, f64> = HashMap::new();
 
     // prompt for each one and append it to a vector
     for subject in subjects {
@@ -32,7 +32,7 @@ pub fn prompt_grades(
             .interact_text()
             .unwrap();
 
-        let grade_as_float = match grade_input.parse::<f32>() {
+        let grade_as_float = match grade_input.parse::<f64>() {
             Ok(v) => v,
             Err(_) => return Err(ScoreledgerGradeError::NaNGrade),
         };
@@ -67,7 +67,7 @@ pub fn verify_grades(save: &saving::Save) -> Result<(), ScoreledgerGradeError> {
 // returns subjects with a corresponding grade as a hashmap (to make it easier to print)
 pub struct SubjectWithGrade {
     pub subject: Subject,
-    pub grade: f32,
+    pub grade: f64,
 }
 
 pub fn subjects_with_grades(
@@ -96,7 +96,7 @@ pub fn subjects_with_grades(
 }
 
 // format a floating value for display
-pub fn format_float(value: f32) -> String {
+pub fn format_float(value: f64) -> String {
     format!("{:.2}", value)
         .trim_end_matches('0')
         .trim_end_matches('.')

@@ -1,6 +1,6 @@
-use dialoguer::{Confirm, Select, Input, theme::ColorfulTheme};
-use std::process::exit;
+use dialoguer::{Confirm, Input, Select, theme::ColorfulTheme};
 use std::collections::HashMap;
+use std::process::exit;
 
 use scoreledger::{calculate_mean, errors, goals, grades, saving, subject};
 
@@ -108,7 +108,8 @@ fn main() {
             println!("Your data has not been deleted.");
         }
     } else if choice == "View report card" {
-        let data = saving::get_data().expect("Unexpected Error: Failed to load data for report card");
+        let data =
+            saving::get_data().expect("Unexpected Error: Failed to load data for report card");
 
         // check each subject that exists and see if a grade exists for it, returns an error saying the subject that is missing a grade
         grades::verify_grades(&data).unwrap_or_else(|e| {
@@ -135,13 +136,19 @@ fn main() {
         for subject_and_grade in &subjects_with_grades {
             println!(
                 "{}: {}{}",
-                subject_and_grade.subject.name, grades::format_float(subject_and_grade.grade), score_unit
+                subject_and_grade.subject.name,
+                grades::format_float(subject_and_grade.grade),
+                score_unit
             );
         }
 
         // display mean of report card to user
         let mean = calculate_mean::calculate_report_mean(subjects_with_grades);
-        println!("Report Card Mean: {}{}", grades::format_float(mean), score_unit);
+        println!(
+            "Report Card Mean: {}{}",
+            grades::format_float(mean),
+            score_unit
+        );
 
         // determine if goals are met
         let goal_vec: Vec<goals::Goal> = data.goals.into_values().collect();
@@ -149,12 +156,16 @@ fn main() {
             if mean >= goal.threshold {
                 println!(
                     "Goal \"{}\" ({}{} Threshold): ✓",
-                    &goal.name, grades::format_float(goal.threshold), score_unit
+                    &goal.name,
+                    grades::format_float(goal.threshold),
+                    score_unit
                 );
             } else {
                 println!(
                     "Goal \"{}\" ({}{} Threshold): ✗",
-                    &goal.name, grades::format_float(goal.threshold), score_unit
+                    &goal.name,
+                    grades::format_float(goal.threshold),
+                    score_unit
                 );
             }
         }
@@ -211,10 +222,7 @@ fn main() {
             println!("Your data has not been deleted.");
         }
     } else if choice == "Settings" {
-        let selections_settings = &[
-            "Change Score Unit",
-            "Exit"
-        ];
+        let selections_settings = &["Change Score Unit", "Exit"];
 
         let selection_menu_settings = Select::with_theme(&ColorfulTheme::default())
             .with_prompt("Select a setting to change")
@@ -227,7 +235,9 @@ fn main() {
 
         if choice_settings == "Change Score Unit" {
             let score_unit: String = Input::with_theme(&ColorfulTheme::default())
-                .with_prompt("Enter a score unit (e.g %), this unit will appear after a score number")
+                .with_prompt(
+                    "Enter a score unit (e.g %), this unit will appear after a score number",
+                )
                 .default("".to_string())
                 .interact_text()
                 .unwrap();
@@ -238,7 +248,6 @@ fn main() {
             println!("Score unit changed successfully.");
         } else if choice_settings == "Exit" {
             println!("Exiting...");
-            return;
         }
     } else if choice == "DEBUG" {
         println!("nothing to see");

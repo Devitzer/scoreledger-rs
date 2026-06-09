@@ -8,7 +8,7 @@ use super::saving::save_subject;
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Subject {
     pub name: String,
-    pub value: f32,
+    pub value: f64,
 }
 
 // A subject select menu which inputs a list of subjects and returns the subject the user selected
@@ -47,7 +47,7 @@ pub fn prompt_subject(save: bool) -> Result<Subject, ScoreledgerSubjectError> {
         .interact_text()
         .unwrap();
 
-    let subject_weight_float = match subject_weight_input.parse::<f32>() {
+    let subject_weight_float = match subject_weight_input.parse::<f64>() {
         Ok(v) => v,
         Err(_) => return Err(ScoreledgerSubjectError::NaNWeight),
     };

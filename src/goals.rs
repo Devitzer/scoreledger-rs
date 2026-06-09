@@ -7,7 +7,7 @@ use crate::saving::save_goal;
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Goal {
     pub name: String,
-    pub threshold: f32,
+    pub threshold: f64,
 }
 
 // A goal select menu which inputs a list of goals and returns the goal the user selected or nothing if the goal doesn't exist for whatever reason
@@ -45,7 +45,7 @@ pub fn prompt_goal(save: bool) -> Result<Goal, ScoreledgerGoalError> {
         .interact_text()
         .unwrap();
 
-    let goal_threshold_float = match goal_threshold_input.parse::<f32>() {
+    let goal_threshold_float = match goal_threshold_input.parse::<f64>() {
         Ok(v) => v,
         Err(_) => return Err(ScoreledgerGoalError::NaNThreshold),
     };

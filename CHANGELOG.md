@@ -1,3 +1,11 @@
+# v0.6.0 (06/08/2026)
+
+## Changes
+- Changed all number values from `f32` to `f64`. This should improve calculation precision, specifically regarding averages.
+
+## NOTE
+- This update should not break saves, since JSON doesn't care about the number type.
+
 # v0.5.0 (06/03/2026)
 
 Completed a bunch of small TODO tasks.
