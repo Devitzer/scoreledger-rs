@@ -1,3 +1,8 @@
+# v0.7.0 (06/10/2026)
+
+## Added
+- Users can now import local files or links with plaintext containing a list of subjects. Scoreledger will import it, validate it, and apply them as your list of subjects. This allows you to create templates for others or use templates if you don't want to enter subjects manually.
+
 # v0.6.0 (06/08/2026)
 
 ## Changes

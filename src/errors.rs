@@ -101,3 +101,7 @@ pub fn default_grade_error(err: ScoreledgerGradeError) -> String {
         ScoreledgerGradeError::NaNGrade => "ERROR: The grade you entered was not a number!".to_string()
     }
 }
+
+pub fn is_url(input: &str) -> bool {
+    input.starts_with("http://") || input.starts_with("https://")
+}
