@@ -17,6 +17,7 @@ pub enum ScoreledgerSubjectError {
     SubjectAlreadyExists,       // the name of the subject
     NoSubjectExists, // typically when you are trying to make a select menu of subjects but none exist
     NaNWeight,       // the weight of a subject person entered wasnt a number
+    InvalidSubjectList, // when you try to import a subject list from a json file and it does not follow the correct structure
 }
 
 #[derive(Debug)]
@@ -70,8 +71,10 @@ pub fn default_subject_error(err: ScoreledgerSubjectError) -> String {
             "ERROR: The weight you entered for the subject is not a number!".to_string()
         }
         ScoreledgerSubjectError::NoSubjectExists => {
-            "ERROR: You cannot select a subject to delete because you haven't made any subjects!"
-                .to_string()
+            "ERROR: You cannot select a subject to delete because you haven't made any subjects!".to_string()
+        }
+        ScoreledgerSubjectError::InvalidSubjectList => {
+            "ERROR: The subject list you provided does not follow the correct structure.".to_string()
         }
     }
 }

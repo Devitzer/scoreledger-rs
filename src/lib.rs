@@ -4,3 +4,4 @@ pub mod goals;
 pub mod grades;
 pub mod saving;
 pub mod subject;
+pub mod subject_lists;
